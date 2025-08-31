@@ -87,6 +87,31 @@ update_config()
     fi
 }
 
+
+update_motor_config()
+{
+    local old_cfg="$2"
+    local new_cfg="$1"
+    
+    # Get versions
+    local old_version=$(get_cfg_version "$old_cfg")
+    local new_version=$(get_cfg_version "$new_cfg")                  
+    
+    # Check if version is empty (failed to get version)
+    if [ -z "$old_version" ]; then
+        echo "failed to get old version, copying new config"
+        cp "$new_cfg" "$old_cfg" && sync
+        return
+    fi
+    
+    # Check if new version is higher
+    if [ $new_version -ne $old_version ]; then
+        echo "update config"     
+        cp "$new_cfg" "$old_cfg" && sync                         
+    fi             
+}
+
+
 copy_config()
 {
     local model=$(get_sn_mac.sh model)
@@ -201,6 +226,8 @@ copy_config()
             sync
         fi
 
+	# update motor_control.cfg from version String
+	update_motor_config "$CONFIG_PATH/motor_control.cfg" $PRINTER_CONFIG_DIR/motor_control.cfg
         # update printer.cfg and keep SAVE_CONFIG section
         update_config "$CONFIG_PATH/printer.cfg" $PRINTER_CONFIG_DIR/printer.cfg
     else

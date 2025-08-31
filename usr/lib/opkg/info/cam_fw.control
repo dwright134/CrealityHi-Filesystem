@@ -1,7 +1,7 @@
 Package: cam_fw
 Version: f12dd0cf
 Depends: libc, librt, libpthread, libusb-1.0-0
-Source: /data/111593/gerrit_new/t113_i/kl_C4408_V2/openwrt/package/creality/cam_fw
+Source: /data/113934/workspace/F018/kl_C4408_V2/openwrt/package/creality/cam_fw
 SourceName: cam_fw
 Section: creality
 SourceDateEpoch: 1742970082

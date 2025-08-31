@@ -2,7 +2,7 @@ Package: libconfig11
 Version: 1.7.2-3
 Depends: libc, librt, libpthread
 Provides: libconfig
-Source: /data/111593/gerrit_new/t113_i/kl_C4408_V2/openwrt/package/feeds/libs/libconfig
+Source: /data/113934/workspace/F018/kl_C4408_V2/openwrt/package/feeds/libs/libconfig
 SourceName: libconfig
 License: LGPL-2.1-or-later
 LicenseFiles: COPYING.LIB

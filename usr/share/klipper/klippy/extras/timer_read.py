@@ -15,6 +15,7 @@ class TimerRead:
         self.extruder_interval = config.getfloat("extruder_interval", 1.)
         # tri_wave_ip = config.get('prtouch_v3', 'prth_dbg_ippt')
         self.tri_wave_ip = self.printer.lookup_object('prtouch_v3').dbg_ippt
+        self.enable_pressure_reading = False
         # READ_PRES
         self.gcode.register_command(
             "STAT_TIMER_READ", self.cmd_START_TIMER_READ)
@@ -30,11 +31,15 @@ class TimerRead:
         self.printer.register_event_handler("klippy:ready", self.handle_ready)
 
     def cmd_START_TIMER_READ(self, gcmd):
+        # 启动应变片采集
+        self.enable_pressure_reading = True
         self.reactor.update_timer(self.read_pres_update_timer, self.reactor.NOW)
 
     def cmd_STOP_TIMER_READ(self, gcmd):
-        self.reactor.update_timer(self.read_pres_update_timer,
-                                  self.reactor.NEVER)
+        # 停止应变片采集
+        self.enable_pressure_reading = False
+        # self.reactor.update_timer(self.read_pres_update_timer,
+        #                           self.reactor.NEVER)
 
     def cmd_START_TEMP_TIMER_READ(self, gcmd):
         self.reactor.update_timer(self.read_extr_temp_timer, self.reactor.NOW)
@@ -90,12 +95,18 @@ class TimerRead:
             sock.close()
 
     def read_pres_update_event(self, eventtime):
-        self.gcode.run_script_from_command("READ_PRES C=45")
-        if self.print_stats.state == "printing":
-            interval = self.print_interval
+        if self.enable_pressure_reading:
+            # self.gcode.run_script_from_command("READ_PRES C=45")
+            self.gcode.run_script_from_command("READ_PRES_PA C=45")
+            # 根据是否正在打印，决定下次触发的时间间隔
+            if self.print_stats.state == "printing":
+                interval = self.print_interval
+            else:
+                interval = self.interval
+            return eventtime + interval
         else:
-            interval = self.interval
-        return eventtime + interval
+            # 停止定时器
+            return self.reactor.NEVER
 
     # Initialization
     def handle_ready(self):

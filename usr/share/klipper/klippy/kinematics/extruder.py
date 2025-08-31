@@ -5,7 +5,7 @@
 # This file may be distributed under the terms of the GNU GPLv3 license.
 import math, logging, os
 import stepper, chelper
-
+import numpy as np
 class ExtruderStepper:
     def __init__(self, config):
         self.printer = config.get_printer()
@@ -14,6 +14,8 @@ class ExtruderStepper:
         self.config_pa = config.getfloat('pressure_advance', 0., minval=0.)
         self.config_smooth_time = config.getfloat(
                 'pressure_advance_smooth_time', 0.040, above=0., maxval=.200)
+        self.pressure_advance_enabled = config.getboolean(
+            'pressure_advance_enabled', True)
         # Setup stepper
         self.stepper = stepper.PrinterStepper(config)
         ffi_main, ffi_lib = chelper.get_ffi()
@@ -31,6 +33,9 @@ class ExtruderStepper:
         gcode.register_mux_command("SET_PRESSURE_ADVANCE", "EXTRUDER",
                                    self.name, self.cmd_SET_PRESSURE_ADVANCE,
                                    desc=self.cmd_SET_PRESSURE_ADVANCE_help)
+        gcode.register_mux_command("ENABLE_PRESSURE_ADVANCE", "EXTRUDER",
+                                   None, self.cmd_ENABLE_PRESSURE_ADVANCE,
+                                   desc=self.cmd_ENABLE_PRESSURE_ADVANCE_help)
         gcode.register_mux_command("SET_EXTRUDER_ROTATION_DISTANCE", "EXTRUDER",
                                    self.name, self.cmd_SET_E_ROTATION_DISTANCE,
                                    desc=self.cmd_SET_E_ROTATION_DISTANCE_help)
@@ -90,6 +95,14 @@ class ExtruderStepper:
             raise gcmd.error("Unable to infer active extruder stepper")
         extruder.extruder_stepper.cmd_SET_PRESSURE_ADVANCE(gcmd)
     def cmd_SET_PRESSURE_ADVANCE(self, gcmd):
+        if not self.pressure_advance_enabled:
+            msg = "SET_PRESSURE_ADVANCE is disabled. Use 'ENABLE_PRESSURE_ADVANCE VALUE=1' to enable"
+            gcmd.respond_info(msg)
+            return
+        else:
+            msg = "SET_PRESSURE_ADVANCE is enabled"
+            gcmd.respond_info(msg)
+
         pressure_advance = gcmd.get_float('ADVANCE', self.pressure_advance,
                                           minval=0.)
         smooth_time = gcmd.get_float('SMOOTH_TIME',
@@ -108,6 +121,18 @@ class ExtruderStepper:
                 gcode_move.recordPrintFileName(v_sd.print_file_name_path, v_sd.current_file.name, pressure_advance="SET_PRESSURE_ADVANCE ADVANCE=%s SMOOTH_TIME=%s" % (pressure_advance, smooth_time))
         except Exception as err:
             logging.error(err)
+    
+    cmd_ENABLE_PRESSURE_ADVANCE_help = "Enable or disable cmd_SET_PRESSURE_ADVANCE (VALUE=1 to enable, VALUE=0 to disable)"
+    def cmd_ENABLE_PRESSURE_ADVANCE(self, gcmd):
+        enable = gcmd.get_int('VALUE', minval=0, maxval=1)
+        self.pressure_advance_enabled = enable
+        if enable:
+            msg = "Pressure advance enabled"
+        else:
+            msg = "Pressure advance disabled"
+        
+        gcmd.respond_info(msg)
+
     cmd_SET_E_ROTATION_DISTANCE_help = "Set extruder rotation distance"
     def cmd_SET_E_ROTATION_DISTANCE(self, gcmd):
         rotation_dist = gcmd.get_float('DISTANCE', None)
@@ -170,6 +195,13 @@ class PrinterExtruder:
             self.heater = pheaters.lookup_heater(shared_heater)
         # Setup kinematic checks
         self.nozzle_diameter = config.getfloat('nozzle_diameter', above=0.)
+        user_nozzle_diameter = config.getfloat('user_nozzle_diameter', default=0.)
+        if user_nozzle_diameter >= 0.1:
+            self.nozzle_diameter = user_nozzle_diameter
+        self.fimament_diameter_raw = config.getfloat('filament_diameter')
+        self.max_extrude_cross_section_raw = config.getfloat('max_extrude_cross_section', None, above=0.)
+        self.max_extrude_only_velocity_raw = config.getfloat('max_extrude_only_velocity', None, above=0.)
+        self.max_extrude_only_accel_raw = config.getfloat('max_extrude_only_accel', None, above=0.)
         filament_diameter = config.getfloat(
             'filament_diameter', minval=self.nozzle_diameter)
         self.filament_area = math.pi * (filament_diameter * .5)**2
@@ -208,6 +240,7 @@ class PrinterExtruder:
         gcode = self.printer.lookup_object('gcode')
         if self.name == 'extruder':
             toolhead.set_extruder(self, 0.)
+            gcode.register_command("SET_NOZZLE_DIAMETER", self.cmd_SET_NOZZLE_DIAMETER)
             gcode.register_command("M104", self.cmd_M104)
             gcode.register_command("M109", self.cmd_M109)
             gcode.register_command("FORCE_MOVE_E", self.cmd_force_move_e)
@@ -219,6 +252,7 @@ class PrinterExtruder:
     def get_status(self, eventtime):
         sts = self.heater.get_status(eventtime)
         sts['can_extrude'] = self.heater.can_extrude
+        sts['nozzle_diameter'] = self.nozzle_diameter
         if self.extruder_stepper is not None:
             sts.update(self.extruder_stepper.get_status(eventtime))
         return sts
@@ -323,6 +357,27 @@ class PrinterExtruder:
         # gcode.run_script_from_command('G92 E%d'%pos_old)
         self.force_move_e_flag = False
 
+    def cmd_SET_NOZZLE_DIAMETER(self, gcmd):
+        value = gcmd.get_float('VALUE', 0.4)
+        self.nozzle_diameter = value
+        filament_diameter = max(self.nozzle_diameter, self.fimament_diameter_raw)
+        self.filament_area = math.pi * (filament_diameter * .5)**2
+        def_max_cross_section = 4. * self.nozzle_diameter**2
+        def_max_extrude_ratio = def_max_cross_section / self.filament_area
+        max_cross_section =  self.max_extrude_cross_section_raw if self.max_extrude_cross_section_raw else def_max_cross_section
+        self.max_extrude_ratio = max_cross_section / self.filament_area
+        logging.info("Extruder max_extrude_ratio=%.6f", self.max_extrude_ratio)
+        toolhead = self.printer.lookup_object('toolhead')
+        max_velocity, max_accel = toolhead.get_max_velocity()
+        if self.max_extrude_only_velocity_raw is None:
+            self.max_e_velocity = max_velocity * def_max_extrude_ratio
+        if self.max_extrude_only_accel_raw is None:
+            self.max_e_accel = max_accel * def_max_extrude_ratio
+        configfile = self.printer.lookup_object('configfile')
+        configfile.set('extruder', 'user_nozzle_diameter', '%.3f' % (self.nozzle_diameter))
+        gcode = self.printer.lookup_object('gcode')
+        gcode.run_script_from_command('CXSAVE_CONFIG')
+        gcmd.respond_info("SET_NOZZLE_DIAMETER: %f" % (value))
     cmd_ACTIVATE_EXTRUDER_help = "Change the active extruder"
     def cmd_ACTIVATE_EXTRUDER(self, gcmd):
         toolhead = self.printer.lookup_object('toolhead')

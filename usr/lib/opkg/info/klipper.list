@@ -320,7 +320,6 @@
 /usr/share/klippy-env/lib/python3.9/site-packages/pip/_vendor/requests/api.pyc
 /usr/share/klippy-env/lib/python3.9/site-packages/pip/_vendor/requests/packages/chardet/escprober.py
 /usr/share/klipper/README.md
-/usr/share/klipper/fw/F018/motor/mot0_023_C30-mot2_002_041.bin
 /usr/share/klippy-env/lib/python3.9/site-packages/pip/operations/__init__.pyc
 /usr/share/klipper/klippy/kinematics/deltesian.py
 /usr/share/klippy-env/lib/python3.9/site-packages/pip/utils/encoding.py
@@ -370,6 +369,7 @@
 /usr/share/klipper/test/klippy/gcode_arcs.test
 /usr/share/klippy-env/bin/activate
 /usr/share/klipper/klippy/kinematics/winch.pyc
+/usr/share/klipper/fw/F018/motor/mot2_023_C30-mot2_002_071.bin
 /usr/share/klippy-env/lib/python3.9/site-packages/pip/_vendor/cachecontrol/serialize.pyc
 /usr/share/klipper/klippy/extras/custom_macro.pyc
 /usr/share/klippy-env/lib/python3.9/site-packages/aenum/test.py
@@ -698,7 +698,6 @@
 /usr/share/klippy-env/lib/python3.9/site-packages/wheel/test/test_ranking.pyc
 /usr/share/klippy-env/lib/python3.9/site-packages/pip/_vendor/html5lib/treebuilders/dom.pyc
 /usr/share/klippy-env/lib/python3.9/site-packages/setuptools/command/install_scripts.pyc
-/usr/share/klipper/fw/F018/motor/mot2_033_C30-mot2_002_041.bin
 /usr/share/klipper/klippy/extras/custom_macro.py
 /usr/share/klipper/klippy/console.py
 /usr/share/klippy-env/lib/python3.9/site-packages/pip/_vendor/requests/packages/urllib3/packages/ssl_match_hostname/__init__.py
@@ -1005,6 +1004,7 @@
 /usr/share/klippy-env/lib/python3.9/site-packages/pip/_vendor/ordereddict.pyc
 /usr/share/klippy-env/lib/python3.9/site-packages/pip/_vendor/requests/packages/__init__.pyc
 /usr/share/klippy-env/lib/python3.9/site-packages/pip-9.0.1.dist-info/METADATA
+/usr/share/klipper/fw/F018/motor/mot0_023_C30-mot2_002_071.bin
 /usr/share/klippy-env/lib/python3.9/site-packages/pip/_vendor/requests/packages/chardet/langbulgarianmodel.pyc
 /usr/share/klippy-env/lib/python3.9/site-packages/pip/_vendor/html5lib/_trie/_base.pyc
 /usr/share/klippy-env/lib/python3.9/site-packages/pip/_vendor/requests/compat.py
@@ -1145,7 +1145,6 @@
 /usr/share/klipper/klippy/extras/tuning_tower.pyc
 /usr/share/klippy-env/lib/python3.9/site-packages/pip/_vendor/requests/packages/chardet/sjisprober.pyc
 /usr/share/klippy-env/lib/python3.9/site-packages/pip/commands/show.pyc
-/usr/share/klipper/fw/F018/motor/mot2_023_C30-mot2_002_041.bin
 /usr/share/klippy-env/lib/python3.9/site-packages/pip/commands/hash.pyc
 /usr/share/klippy-env/lib/python3.9/site-packages/setuptools/command/egg_info.pyc
 /usr/share/klippy-env/lib/python3.9/site-packages/setuptools/sandbox.py
@@ -1415,6 +1414,7 @@
 /usr/share/klipper/klippy/kinematics/deltesian.pyc
 /usr/share/klippy-env/lib/python3.9/site-packages/pip/utils/encoding.pyc
 /usr/share/klippy-env/lib/python3.9/site-packages/wheel/test/simple.dist/setup.pyc
+/usr/share/klipper/fw/F018/motor/mot2_033_C30-mot2_002_071.bin
 /usr/share/klipper/klippy/extras/heaters.pyc
 /usr/share/klipper/klippy/extras/hx711s.pyc
 /usr/share/klipper/klippy/extras/tsl1401cl_filament_width_sensor.py

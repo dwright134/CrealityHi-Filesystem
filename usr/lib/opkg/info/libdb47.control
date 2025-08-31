@@ -2,7 +2,7 @@ Package: libdb47
 Version: 4.7.25.4.NC-5
 Depends: libc, librt, libpthread, libxml2
 Provides: libdb47-full
-Source: /data/111593/gerrit_new/t113_i/kl_C4408_V2/openwrt/package/feeds/libs/db47
+Source: /data/113934/workspace/F018/kl_C4408_V2/openwrt/package/feeds/libs/db47
 SourceName: libdb47
 License: Sleepycat
 LicenseFiles: LICENSE

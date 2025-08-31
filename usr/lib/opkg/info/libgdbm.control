@@ -1,7 +1,7 @@
 Package: libgdbm
 Version: 1.18.1-2
 Depends: libc, librt, libpthread
-Source: /data/111593/gerrit_new/t113_i/kl_C4408_V2/openwrt/package/feeds/libs/gdbm
+Source: /data/113934/workspace/F018/kl_C4408_V2/openwrt/package/feeds/libs/gdbm
 SourceName: libgdbm
 License: GPL-3.0-or-later
 LicenseFiles: COPYING

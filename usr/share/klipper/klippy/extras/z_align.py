@@ -47,6 +47,7 @@ class Zalign:
         self.gcode.register_command("ZDOWN_SWITCH", self.cmd_ZDOWN_SWITCH)
         self.zdown_switch_enable = 1
         self.gcode.register_command("UP_SAFE_Z", self.cmd_UP_SAFE_Z)
+        self.gcode.register_command("CHECK_ZLIMIT", self.check_zlimit)
 
     def _build_config(self):  
         stepper_indx_z = 0
@@ -85,6 +86,33 @@ class Zalign:
         self.mcu.add_config_cmd(config_z_align_up_add_z1)
     def cmd_ZDOWN_SWITCH(self, gcmd):
         self.zdown_switch_enable = gcmd.get_int('ENABLE', default=1)
+        
+
+    def check_zlimit(self, gcmd):
+        reactor = self.printer.get_reactor()
+        #读取限位状态 避免限位开关异常下怼平台
+        fb1 = self.printer.lookup_object('filament_switch_sensor filament_sensor_4',None)
+        fb2 = self.printer.lookup_object('filament_switch_sensor filament_sensor_5',None)
+        z1_limit_state = fb1.get_status(None).get("filament_detected")
+        z2_limit_state = fb2.get_status(None).get("filament_detected")
+
+        if z1_limit_state or z2_limit_state:      #一次判断
+            self.gcode.run_script_from_command('FORCE_MOVE STEPPER=stepper_z DISTANCE=-0.5 VELOCITY=10')
+            self.gcode.run_script_from_command('FORCE_MOVE STEPPER=stepper_z1 DISTANCE=-0.5 VELOCITY=10')
+            self.gcode.run_script_from_command('M400')    
+            reactor.pause(reactor.monotonic() + 1.0) #暂停1s 
+            z1_limit_state = fb1.get_status(None).get("filament_detected")
+            z2_limit_state = fb2.get_status(None).get("filament_detected")
+            if z1_limit_state or z2_limit_state:   #二次判断
+                if z1_limit_state:
+                    self.gcode.respond_info("z1_limit error state")  
+                if z2_limit_state:
+                    self.gcode.respond_info("z2_limit error state")  
+                err_msg = """{"code":"key357", "msg":"光电开关状态异常或者是热床过于倾斜", "values":[]}"""
+                self.gcode._respond_error(err_msg)
+                raise self.error(err_msg) #gcmd.error(err_msg)
+            
+        self.gcode.respond_info("z_limit normal state")
 
     def check_zlimit_state(self):
         reactor = self.printer.get_reactor()
@@ -107,12 +135,14 @@ class Zalign:
             z2_limit_state = fb2.get_status(None).get("filament_detected")
             if z1_limit_state and z2_limit_state:   #二次判断
                 err_msg = """{"code":"key357", "msg":"光电开关状态异常或者是热床过于倾斜", "values":[]}"""
-                raise self.gcode._respond_error(err_msg)
+                self.gcode._respond_error(err_msg)
+                raise self.error(err_msg)
     
     def cmd_UP_SAFE_Z(self, gcmd):
         self.gcode.respond_info("cmd_UP_SAFE_Z start")
         reactor = self.printer.get_reactor()
-        self.check_zlimit_state()  #zlimit_state
+        self.gcode.run_script_from_command("CHECK_ZLIMIT")
+        #self.check_zlimit_state()  #zlimit_state
 
         query_z_align = self.mcu.lookup_query_command("query_z_align_up oid=%c enable=%c quickSpeed=%u slowSpeed=%u risingDist=%u filterCnt=%c",
                                                 "z_align_status oid=%c flag=%i deltaError1=%i", oid=self.oidz1)    

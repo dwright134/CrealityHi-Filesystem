@@ -1,7 +1,7 @@
 Package: ncnn_yolov5
 Version: 6547da5d
 Depends: libc, librt, libpthread, libpthread, librt, libstdcpp6, zlib, libjpeg, libfreetype, opencv, libjson-c5, libcurl4
-Source: /data/111593/gerrit_new/t113_i/kl_C4408_V2/openwrt/package/creality/ncnn_yolov5
+Source: /data/113934/workspace/F018/kl_C4408_V2/openwrt/package/creality/ncnn_yolov5
 SourceName: ncnn_yolov5
 License: Apache-2.0
 LicenseFiles: LICENSE

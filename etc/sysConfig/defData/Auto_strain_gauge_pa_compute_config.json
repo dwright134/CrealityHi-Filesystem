@@ -1,13 +1,31 @@
 {
-    "filename": "/tmp/saved_whole_stress.csv",
-    "column": 1,
-    "peakValue": 1.0,
-    "tol": 1e-6,
-    "fraction": 0.1,
-    "riseWindow": 3,
-    "riseThreshold": 4,
-    "riseMinGrowth": 0.3,
-    "gaussSigma": 2.0,
-    "valleyProminence": 10000.0
+    "common": {
+        "filename": "/tmp/saved_whole_stress.csv",
+        "column": 1,
+        "peakValue": 1.0,
+        "tol": 1e-6,
+        "fraction": 0.1,
+        "riseWindow": 3,
+        "riseThreshold": 4,
+        "riseMinGrowth": 0.3,
+        "valleyProminence": 10000.0
+    },
+    "Hyper PLA": {
+        "gaussSigma": 2.0,
+        "paStrat": 0.008,
+        "paStep": 0.002,
+        "paPeriodicity": 31
+    },
+    "Hyper PETG": {
+        "gaussSigma": 2.0,
+        "paStrat": 0.034,
+        "paStep": 0.002,
+        "paPeriodicity": 31
+    },
+    "Hyper ABS": {
+        "gaussSigma": 2.0,
+        "paStrat": 0.004,
+        "paStep": 0.001,
+        "paPeriodicity": 31
+    }
 }
-  

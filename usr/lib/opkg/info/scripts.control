@@ -1,10 +1,10 @@
 Package: scripts
 Version: 1
-Depends: libc, librt, libpthread, opencv, libstdcpp6
-Source: /data/111593/gerrit_new/t113_i/kl_C4408_V2/openwrt/package/creality/scripts
+Depends: libc, librt, libpthread
+Source: /data/113934/workspace/F018/kl_C4408_V2/openwrt/package/creality/scripts
 SourceName: scripts
 Section: creality
-SourceDateEpoch: 1744351741
+SourceDateEpoch: 1750383655
 Architecture: arm_cortex-a7_neon
-Installed-Size: 3348433
+Installed-Size: 3155135
 Description:  with scripts support

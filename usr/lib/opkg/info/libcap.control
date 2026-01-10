@@ -1,7 +1,7 @@
 Package: libcap
 Version: 2.27-1
 Depends: libc, librt, libpthread
-Source: /data/113934/workspace/F018/kl_C4408_V2/openwrt/package/feeds/libs/libcap
+Source: /data2/116680/lgm1/bb/kl_C4408_V2/openwrt/package/feeds/libs/libcap
 SourceName: libcap
 License: GPL-2.0
 LicenseFiles: License

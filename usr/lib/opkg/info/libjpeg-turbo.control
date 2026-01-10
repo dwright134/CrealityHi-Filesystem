@@ -2,7 +2,7 @@ Package: libjpeg-turbo
 Version: 2.1.1-1
 Depends: libc, librt, libpthread
 Provides: libjpeg
-Source: /data/113934/workspace/F018/kl_C4408_V2/openwrt/package/feeds/libs/libjpeg-turbo
+Source: /data2/116680/lgm1/bb/kl_C4408_V2/openwrt/package/feeds/libs/libjpeg-turbo
 SourceName: libjpeg-turbo
 License: BSD-3-Clause IJG zlib
 LicenseFiles: LICENSE.md

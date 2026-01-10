@@ -1,7 +1,7 @@
 Package: libmad
 Version: 0.15.1b-3
 Depends: libc, librt, libpthread
-Source: /data/113934/workspace/F018/kl_C4408_V2/openwrt/package/feeds/libs/libmad
+Source: /data2/116680/lgm1/bb/kl_C4408_V2/openwrt/package/feeds/libs/libmad
 SourceName: libmad
 License: GPLv2
 LicenseFiles: COPYING

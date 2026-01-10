@@ -1,10 +1,10 @@
 Package: lvgl_klipper
-Version: 0a877abc
+Version: d15240d
 Depends: libc, librt, libpthread, libcrlog, aliyun-oss-cpp-sdk, libapr, libaprutil, libatomic1, libffmpeg-full, libblobmsg-json20210516, libopenssl1.1, libcurl4, libfreetype, libhv, libinotifytools, libjpeg, libjson-c5, jsoncpp, mxml, libpng, paho-mqtt-c, libprotobuf-c, libqrencode, libstdcpp6, libubox20210516, libubus20210630, libuuid1, wifimanager-v2.0-lib, libcxcloud
-Source: /data/113934/workspace/F018/kl_C4408_V2/openwrt/package/creality/lvgl_klipper
+Source: /data2/116680/lgm1/bb/kl_C4408_V2/openwrt/package/creality/lvgl_klipper
 SourceName: lvgl_klipper
 Section: creality
 SourceDateEpoch: 1752760458
 Architecture: arm_cortex-a7_neon
-Installed-Size: 13209258
+Installed-Size: 13211715
 Description:  with 440x_klipper support

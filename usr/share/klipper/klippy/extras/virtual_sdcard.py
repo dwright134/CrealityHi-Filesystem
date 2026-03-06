@@ -3,8 +3,7 @@
 # Copyright (C) 2018  Kevin O'Connor <kevin@koconnor.net>
 #
 # This file may be distributed under the terms of the GNU GPLv3 license.
-import os, logging, io, json, time, re, threading
-from .tool import reportInformation
+import os, logging, io, json, time, re, threading, copy
 from .base_info import base_dir, system_info_instance
 
 VALID_GCODE_EXTS = ['gcode', 'g', 'gco']
@@ -425,7 +424,7 @@ class VirtualSD:
                 logging.exception("virtual_sdcard get_file_list")
                 raise self.gcode.error("Unable to get file list")
     def get_status(self, eventtime):
-        return {
+        res = copy.deepcopy({
             'file_path': self.file_path(),
             'progress': self.progress(),
             'is_active': self.is_active(),
@@ -435,8 +434,11 @@ class VirtualSD:
             'layer': self.layer,
             'layer_count': self.layer_count,
             'run_dis': self.run_dis,
-            'klipper_capture': self.klipper_capture
-        }
+            'klipper_capture': self.klipper_capture,
+            # 'bed_mesh_calibate_state': self.bed_mesh_calibate_state,
+            'cur_print_data': self.cur_print_data.get("jobs", [])[0] if self.cur_print_data.get("jobs", []) else {}
+        })
+        return res
     def file_path(self):
         if self.current_file:
             return self.current_file.name
@@ -503,10 +505,6 @@ class VirtualSD:
         except Exception as err:
             pass
         self.update_print_history_info(only_update_status=True, state="cancelled")
-        if self.print_id and self.cur_print_data:
-            reportInformation("key701", data=self.cur_print_data)
-            self.print_id = ""
-            self.cur_print_data = {}
     # G-Code commands
     def cmd_error(self, gcmd):
         raise gcmd.error("SD write not supported")
@@ -582,7 +580,7 @@ class VirtualSD:
         delay_photography_switch, location, frame, interval, power_loss_switch = self.get_delay_photography_info()
         cmd_param = gcmd.get_raw_command_parameters()
         if delay_photography_switch and os.path.exists("/tmp/camera_main"):
-            if all(gcode not in cmd_param for gcode in ["M400", "G1", "G2"]) and (frame := gcmd.get_int("P", default=None, minval=10, maxval=20)) and 10 <= frame <= 20:
+            if all(gcode not in cmd_param for gcode in ["M400", "G1", "G2"]) and (frame := gcmd.get_int("P", default=None, minval=10, maxval=1000)) and 10 <= frame <= 1000:
                 try:
                     import subprocess
                     self.klipper_capture = True
@@ -591,6 +589,7 @@ class VirtualSD:
                     capture_ret = subprocess.check_output(capture_shell, shell=True).decode("utf-8")
                     logging.info("%s return:#%s#" % (capture_shell, str(capture_ret)))
                     self.gcode.respond_info("capture 0")
+                    self.gcode.run_script_from_command('STEER_CAMERA_MODULE')
                 except Exception as err:
                     logging.error(err)
             else:
@@ -719,7 +718,8 @@ class VirtualSD:
             f.seek(0)
         except:
             logging.exception("virtual_sdcard file open")
-            raise gcmd.error("""{"code":"key121", "msg": "Unable to open file", "values": []}""")
+            # raise gcmd.error("""{"code":"key121", "msg": "Unable to open file", "values": []}""")
+            return gcmd.warning("""{"code":"key121", "msg": "Unable to open file", "values": []}""")
         gcmd.respond_raw("File opened:%s Size:%d" % (filename, fsize))
         gcmd.respond_raw("File selected")
         self.current_file = f
@@ -781,22 +781,29 @@ class VirtualSD:
         # result 0为单色 1为多色中的单色(只有一个T0) 2为多色(有T0、T1、T2等)
         result = 0
         count = 5
-        with open(file_path, 'r') as f:
-            while count > 0:
-                count -= 1
-                header_data = f.read(int(READ_SIZE))
-                pattern_T = r"(?m)^\s*T(\d+)\s*$"
-                pattern_G = r"(?m)^\s*G1"
-                value_G = re.findall(pattern_G, header_data)
-                # 匹配到G1指令的时候, 再去匹配T指令
-                if len(value_G)<=1:
-                    continue
-                value_T = re.findall(pattern_T, header_data)
-                if len(value_T) == 1:
-                    result = 1
-                elif len(value_T) > 1:
-                    result = 2
-                break
+        try:
+            with open(file_path, 'r') as f:
+                while count > 0:
+                    count -= 1
+                    try:
+                        header_data = f.read(int(READ_SIZE))
+                    except Exception as err:
+                        logging.error(f"check_Tn read error: {err}")
+                        break
+                    pattern_T = r"(?m)^\s*T(\d+)\s*$"
+                    pattern_G = r"(?m)^\s*G1"
+                    value_G = re.findall(pattern_G, header_data)
+                    # 匹配到G1指令的时候, 再去匹配T指令
+                    if len(value_G) <= 1:
+                        continue
+                    value_T = re.findall(pattern_T, header_data)
+                    if len(value_T) == 1:
+                        result = 1
+                    elif len(value_T) > 1:
+                        result = 2
+                    break
+        except Exception as err:
+            logging.error(f"check_Tn open error: {err}")
         return result
     
     def get_first_Tn(self, file_path):
@@ -1189,8 +1196,6 @@ class VirtualSD:
                 self.fan_state["M106 P2"] = M106_line
         elif line.startswith("END_PRINT"):
             self.end_print_state = True
-            if self.print_id and os.path.exists("/tmp/camera_main"):
-                reportInformation("key608", data={"print_id": self.print_id})
             if os.path.exists(self.print_file_name_path):
                 os.remove(self.print_file_name_path)
             if os.path.exists(self.gcode.exclude_object_info):
@@ -1309,8 +1314,17 @@ class VirtualSD:
                         logging.error(f'error occurred while pause, error:{e}')
                     finally:
                         self.cmd_from_sd = False
+            elif cfs_enable and extruder_filament is False:
+                    # 查找当前位置之前的最近一个T指令
+                    XYZET = self.getXYZET(self.current_file.name, self.file_position)
+                    last_T = XYZET.get("T", None)
+                    if last_T:
+                        logging.info(f"CFS print resume，last T cmd: {last_T}")
+                        self.gcode.run_script(f"{last_T}")
+                        self.reactor.pause(self.reactor.monotonic() + 1)
         self.resum_empty_print_flag = False
         toolhead = self.printer.lookup_object('toolhead')
+        toolhead.extrude_below_min_temp_err_is_report = False
         start_time = interval_start_time = self.reactor.monotonic()
         self.last_layer = self.layer
         while not self.must_pause_work:
@@ -1322,7 +1336,9 @@ class VirtualSD:
                     logging.exception(err)
                     err_msg = '{"code": "key571", "msg": "File UnicodeDecodeError"}'
                     self.gcode.respond_info(err_msg)
-                    raise self.printer.command_error(err_msg)
+                    self.cmd_from_sd = True #调用CANCEL_PRINT前置cmd_from_sd为True，不然会卡在
+                    self.gcode.run_script("CANCEL_PRINT")
+                    break
                 except:
                     logging.exception("virtual_sdcard read")
                     break
@@ -1345,12 +1361,7 @@ class VirtualSD:
                     self.layer_count = 0
                     self.fan_state = {}
                     self.update_print_history_info(only_update_status=True, state="completed")
-                    if self.print_id and not self.end_print_state and os.path.exists("/tmp/camera_main"):
-                        reportInformation("key608", data={"print_id": self.print_id})
                     self.reactor.pause(self.reactor.monotonic() + 0.3)
-                    reportInformation("key701", data=self.cur_print_data)
-                    self.cur_print_data = {}
-                    self.print_id = ""
                     break
                 lines = data.split('\n')
                 lines[0] = partial_input + lines[0]
@@ -1428,6 +1439,7 @@ class VirtualSD:
         self.work_timer = None
         self.cmd_from_sd = False
         self.klipper_capture = False
+        toolhead.extrude_below_min_temp_err_is_report = False
         if error_message is not None:
             self.print_stats.note_error(error_message)
         elif self.current_file is not None:

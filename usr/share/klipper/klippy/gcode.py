@@ -4,16 +4,52 @@
 #
 # This file may be distributed under the terms of the GNU GPLv3 license.
 import os, re, logging, collections, shlex
-from extras.tool import reportInformation
+import time, json, typing, warnings
+
 from extras.base_info import base_dir
+import cProfile
+import pstats
+
+class CommandWarning(Warning):
+    @classmethod
+    def warn(cls, message: str, stacklevel: int = 2):
+        warnings.warn(message, cls, stacklevel=stacklevel)
 
 class CommandError(Exception):
     pass
+
+class ModuleCommandError(CommandError):
+    
+    def __init__(self, message: str, command: typing.Optional[str] = None, **kwargs):
+        self.message = message
+        self._module_name = self._infer_module_name()
+        super().__init__(self.message)
+        
+    def _format_message(self) -> str:
+        return f"[{self._module_name}] {self.message}"
+
+    def _infer_module_name(self) -> str:
+        cls_name = self.__class__.__name__
+        if cls_name.endswith("Error"):
+            return cls_name[:-5].lower()
+        return "unknown"
+
+    @property
+    def handle_event_name(self):
+        return f"{self._module_name}:command_error"
+    
+    @handle_event_name.setter
+    def handle_event_name(self):
+        pass
+
+    def handle_event(self, cls, monotonic):
+        pass
 
 Coord = collections.namedtuple('Coord', ('x', 'y', 'z', 'e'))
 
 class GCodeCommand:
     error = CommandError
+    warning = CommandWarning.warn
     def __init__(self, gcode, command, commandline, params, need_ack):
         self._command = command
         self._commandline = commandline
@@ -65,15 +101,14 @@ class GCodeCommand:
         try:
             value = parser(value)
         except:
-            raise self.error(
-                             """{"code":"key171", "msg": "Unable to parse '%s' as a  %s", "values": ["%s", "%s"]}""" % (self._commandline, value,
-                                                                                                                  self._commandline, value)
-                             )
+            return self.warning(
+                             """{"code":"key171", "msg": "Unable to parse '%s' as a  %s", "values": ["%s", "%s"]}""" 
+                             % (self._commandline, value, self._commandline, value))
         if minval is not None and value < minval:
-            raise self.error("""{"code":"key252","msg":"Error on '%s': %s must have minimum of %s","values":["%s","%s","%s"]}"""
+            return self.warning("""{"code":"key252","msg":"Error on '%s': %s must have minimum of %s","values":["%s","%s","%s"]}"""
                              % (self._commandline, name, minval, self._commandline, name, minval))
         if maxval is not None and value > maxval:
-            raise self.error("""{"code":"key253", "msg":"Error on '%s': %s must have maximumof %s", "values":["%s","%s","%s"]}"""
+            return self.warning("""{"code":"key253", "msg":"Error on '%s': %s must have maximumof %s", "values":["%s","%s","%s"]}"""
                              % (self._commandline, name, maxval, self._commandline, name, maxval))
         if above is not None and value <= above:
             raise self.error("""{"code":"key254", "msg":"Error on '%s': %s must be above %s", "values":["%s","%s","%s"]}"""
@@ -92,6 +127,7 @@ class GCodeCommand:
 # Parse and dispatch G-Code commands
 class GCodeDispatch:
     error = CommandError
+    warning = CommandWarning.warn
     Coord = Coord
     def __init__(self, printer):
         self.printer = printer
@@ -202,33 +238,56 @@ class GCodeDispatch:
             gcmd = GCodeCommand(self, cmd, origline, params, need_ack)
             # Invoke handler for command
             handler = self.gcode_handlers.get(cmd, self.cmd_default)
-            try:
-                handler(gcmd)
-            except self.error as e:
-                self._respond_error(str(e))
-                self.printer.send_event("gcode:command_error")
-                if not need_ack:
-                    raise
-            except:
-                msg = """{"code":"key60", "msg":"Internal error on command:%s", "values": ["%s"]}""" % (cmd, cmd)
-                logging.exception(msg)
-                self.printer.invoke_shutdown(msg)
-                self._respond_error(msg)
-                if not need_ack:
-                    raise
-            gcmd.ack()
-            if line.startswith("G1") or line.startswith("G0"):
-                pass
-            elif line.startswith("M104"):
-                self.set_temperature("extruder", line)
-            elif line.startswith("M140"):
-                self.set_temperature("bed", line)
-            elif line.startswith("M109"):
-                self.set_temperature("extruder", line)
-            elif line.startswith("M190"):
-                self.set_temperature("bed", line)
-            elif line.startswith("EXCLUDE_OBJECT_DEFINE") or line.startswith("EXCLUDE_OBJECT NAME"):
-                self.record_exclude_object_info(line)
+            with warnings.catch_warnings(record=True) as w:
+                # warning part1
+                warnings.filterwarnings("error", message=".*!.*", category=CommandWarning)
+                warnings.simplefilter("always", category=CommandWarning, append=True)
+                try:
+                    handler(gcmd)
+                except self.error as e:
+                    logging.warning("except self.error as e")
+                    self._respond_error(str(e))
+                    self.printer.send_event("gcode:command_error")
+                    if not need_ack:
+                        raise
+                except ModuleCommandError as e:
+                    logging.warning("except ModuleCommandError as e")
+                    self._respond_error(str(e))
+                    if hasattr(self.printer, "send_event"):
+                        self.printer.send_event(e.handle_event_name)
+                    if not need_ack:
+                        raise
+                except Warning as e:
+                    # 需要停止打印raise抛出!warning, 不停止程序则return warning由catch_warnings捕获
+                    logging.warning("Warning as e")
+                    self._respond_warning(str(e))
+                except CommandWarning as e:
+                    logging.warning("CommandWarning as e")
+                    self._respond_warning(str(e))
+                except:
+                    msg = """{"code":"key60", "ms g":"Internal error on command:%s", "values": ["%s"]}""" % (cmd, cmd)
+                    logging.exception(msg)
+                    self.printer.invoke_shutdown(msg)
+                    self._respond_error(msg)
+                    if not need_ack:
+                        raise
+                finally:
+                    for wars in w:
+                        self._respond_warning(str(wars.message))
+                            
+                gcmd.ack()
+                if line.startswith("G1") or line.startswith("G0"):
+                    pass
+                elif line.startswith("M104"):
+                    self.set_temperature("extruder", line)
+                elif line.startswith("M140"):
+                    self.set_temperature("bed", line)
+                elif line.startswith("M109"):
+                    self.set_temperature("extruder", line)
+                elif line.startswith("M190"):
+                    self.set_temperature("bed", line)
+                elif line.startswith("EXCLUDE_OBJECT_DEFINE") or line.startswith("EXCLUDE_OBJECT NAME"):
+                    self.record_exclude_object_info(line)
     def set_temperature(self, key, value):
         import json
         try:
@@ -304,23 +363,17 @@ class GCodeDispatch:
             logging.info(msg)
         lines = [l.strip() for l in msg.strip().split('\n')]
         self.respond_raw("// " + "\n// ".join(lines))
-    def _respond_error(self, msg):
-        from extras.tool import reportInformation
-        try:
-            v_sd = self.printer.lookup_object('virtual_sdcard')
-            if v_sd.print_id and "key" in msg and re.findall('key(\d+)', msg) and v_sd.cur_print_data:
-                v_sd.update_print_history_info(only_update_status=True, state="error", error_msg=eval(msg))
-                v_sd.print_id = ""
-                reportInformation("key701", data=v_sd.cur_print_data)
-                v_sd.cur_print_data = {}
-        except Exception as err:
-            logging.error(err)
-        try:
-            if "key" in msg and re.findall('key(\d+)', msg):
-                reportInformation(msg)
-        except Exception as err:
-            logging.error(err)
+    def _respond_warning(self, msg):
         logging.warning(msg)
+        lines = msg.strip().split('\n')
+        if len(lines) > 1:
+            self.respond_info("\n".join(lines), log=False)
+        self.respond_raw('## %s' % (lines[0].strip(),))
+    def _respond_error(self, msg):
+        # 清理所有上传云端数据, 减少异常
+        # TODO: klipper端上报key***冗余代码待清理及优化逻辑，目前只删除上报逻辑，保留特殊key601/602/603/608/701/
+
+        logging.error(msg)
         lines = msg.strip().split('\n')
         if len(lines) > 1:
             self.respond_info("\n".join(lines), log=False)
@@ -547,9 +600,7 @@ class GCodeIO:
     def _respond_raw(self, msg):
         if self.pipe_is_active:
             try:
-                os.write(self.fd, (msg+"\n").encode())
-                # if 'key506' not in msg and 'key507' not in msg and 'key3"' not in msg and "key" in msg:
-                #     reportInformation(msg)
+                os.write(self.fd, (msg+"\n").encode())  # 用于处理gcode执行中事件上报，所以绕过socket缓冲区/tmp/klipper_uds，及时上报异常
             except os.error:
                 logging.exception("Write g-code response")
                 self.pipe_is_active = False

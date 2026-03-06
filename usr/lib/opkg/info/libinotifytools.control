@@ -1,7 +1,7 @@
 Package: libinotifytools
 Version: 3.20.11.0-1
 Depends: libc, librt, libpthread
-Source: /data2/116680/lgm1/bb/kl_C4408_V2/openwrt/package/feeds/utils/inotify-tools
+Source: /data2/116680/lgm1/kl_C4408_V2/openwrt/package/feeds/utils/inotify-tools
 SourceName: libinotifytools
 License: GPLv2
 LicenseFiles: COPYING

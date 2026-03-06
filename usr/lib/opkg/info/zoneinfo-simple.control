@@ -1,7 +1,7 @@
 Package: zoneinfo-simple
 Version: 2021a-1
 Depends: libc, librt, libpthread
-Source: /data2/116680/lgm1/bb/kl_C4408_V2/openwrt/package/feeds/utils/zoneinfo
+Source: /data2/116680/lgm1/kl_C4408_V2/openwrt/package/feeds/utils/zoneinfo
 SourceName: zoneinfo-simple
 License: Public Domain
 Section: utils

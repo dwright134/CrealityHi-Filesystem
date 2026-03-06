@@ -1,7 +1,7 @@
 Package: lmdb
 Version: 0.9.28-1
 Depends: libc, librt, libpthread
-Source: /data2/116680/lgm1/bb/kl_C4408_V2/openwrt/package/feeds/libs/lmdb
+Source: /data2/116680/lgm1/kl_C4408_V2/openwrt/package/feeds/libs/lmdb
 SourceName: lmdb
 License: OLDAP-2.8
 LicenseFiles: LICENSE

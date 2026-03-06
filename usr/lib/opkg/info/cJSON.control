@@ -1,7 +1,7 @@
 Package: cJSON
 Version: 1.7.14-3
 Depends: libc, librt, libpthread
-Source: /data2/116680/lgm1/bb/kl_C4408_V2/openwrt/package/feeds/libs/cjson
+Source: /data2/116680/lgm1/kl_C4408_V2/openwrt/package/feeds/libs/cjson
 SourceName: cJSON
 License: MIT
 LicenseFiles: LICENSE

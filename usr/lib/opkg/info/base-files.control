@@ -1,5 +1,5 @@
 Package: base-files
-Version: 4-r0-2f549ff9a
+Version: 4-r0-74a28c069
 Depends: libc, librt, libpthread, netifd, procd, jsonfilter, fstools, fwtool
 Source: package/base-files
 SourceName: base-files

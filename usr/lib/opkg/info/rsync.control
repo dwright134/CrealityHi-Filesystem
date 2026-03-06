@@ -1,7 +1,7 @@
 Package: rsync
 Version: 3.2.3-3
 Depends: libc, librt, libpthread, libpopt0, zlib
-Source: /data2/116680/lgm1/bb/kl_C4408_V2/openwrt/package/feeds/net/rsync
+Source: /data2/116680/lgm1/kl_C4408_V2/openwrt/package/feeds/net/rsync
 SourceName: rsync
 License: GPL-3.0-or-later
 LicenseFiles: COPYING

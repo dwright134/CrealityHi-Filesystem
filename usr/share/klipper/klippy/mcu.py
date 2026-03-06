@@ -608,6 +608,76 @@ class MCU:
         printer.register_event_handler("klippy:connect", self._connect)
         printer.register_event_handler("klippy:shutdown", self._shutdown)
         printer.register_event_handler("klippy:disconnect", self._disconnect)
+        self.cur_code_key = ""
+        if self._name == "mcu" or self._name == "nozzle_mcu":
+            self._do_query_timer = self._reactor.register_timer(self._do_query)
+            self._reactor.update_timer(self._do_query_timer, self._reactor.NOW)
+    def _do_query(self, eventtime):
+        try:
+            mcu_temp_obj = self._printer.lookup_object('temperature_sensor mcu_temp') if self._printer.objects.get('temperature_sensor mcu_temp') else None
+            chamber_temp_obj = self._printer.lookup_object('temperature_sensor chamber_temp') if self._printer.objects.get('temperature_sensor chamber_temp') else None
+            heater_bed_obj = self._printer.lookup_object('heater_bed') if self._printer.objects.get('heater_bed') else None
+            extruder_obj = self._printer.lookup_object('extruder') if self._printer.objects.get('extruder') else None
+            gcode = self._printer.lookup_object('gcode')
+            code_key_string = ""
+            msg = "adc out of range"
+            if (chamber_temp_obj and -20 < chamber_temp_obj.last_temp < 500) and (mcu_temp_obj and -20 < mcu_temp_obj.last_temp < 500):
+                self._serial.adc_out_of_range_info["mcu0"] = False
+                self._serial.adc_out_of_range_info["mcu0_isReport"] = False
+            if extruder_obj and -20 < extruder_obj.heater.smoothed_temp < 500:
+                self._serial.adc_out_of_range_info["noz0"] = False
+                self._serial.adc_out_of_range_info["noz0_isReport"] = False
+            if heater_bed_obj and -20 < heater_bed_obj.heater.smoothed_temp < 500:
+                self._serial.adc_out_of_range_info["bed0"] = False
+                self._serial.adc_out_of_range_info["bed0_isReport"] = False
+
+            if self._serial.adc_out_of_range_info["mcu0"]:
+                if heater_bed_obj and heater_bed_obj.heater.smoothed_temp < 0:
+                    msg += " heater_bed_temp:%s" % round(heater_bed_obj.heater.smoothed_temp, 2)
+                    code_key_string = "key510"
+                elif heater_bed_obj and heater_bed_obj.heater.smoothed_temp > 500:
+                    msg += " heater_bed_temp:%s" % round(heater_bed_obj.heater.smoothed_temp, 2)
+                    code_key_string = "key516"
+                if code_key_string and not self._serial.adc_out_of_range_info["bed0_isReport"]:
+                    # self._serial.adc_out_of_range_info["bed0_isReport"] = True
+                    # gcode._respond_error("""{"code": "%s", "msg":"bed %s", "values": []}""" % (code_key_string, self._name + " " + msg))
+                    raise self._reactor.error("""{"code": "%s", "msg":"bed %s", "values": []}""" % (code_key_string, self._name + " " + msg))
+                if chamber_temp_obj and chamber_temp_obj.last_temp < 0:
+                    msg += " chamber_temp:%s" % round(chamber_temp_obj.last_temp, 2)
+                    code_key_string = "key511"
+                elif chamber_temp_obj and chamber_temp_obj.last_temp > 500:
+                    msg += " chamber_temp:%s" % round(chamber_temp_obj.last_temp, 2)
+                    code_key_string = "key517"
+                if mcu_temp_obj and mcu_temp_obj.last_temp < 0:
+                    msg += " mcu_temp:%s" % round(mcu_temp_obj.last_temp, 2)
+                    code_key_string = "key512"
+                elif mcu_temp_obj and mcu_temp_obj.last_temp > 500:
+                    msg += " mcu_temp:%s" % round(mcu_temp_obj.last_temp, 2)
+                    code_key_string = "key518"
+                if code_key_string and not self._serial.adc_out_of_range_info["mcu0_isReport"]:
+                    # self._serial.adc_out_of_range_info["mcu0_isReport"] = True
+                    # gcode._respond_error("""{"code": "%s", "msg":"mcu %s", "values": []}""" % (code_key_string, self._name + " " + msg))
+                    raise self._reactor.error("""{"code": "%s", "msg":"mcu %s", "values": []}""" % (code_key_string, self._name + " " + msg))
+            if self._serial.adc_out_of_range_info["noz0"]:
+                if extruder_obj and extruder_obj.heater.smoothed_temp < 0:
+                    msg += " extruder_temp:%s" % round(extruder_obj.heater.smoothed_temp, 2)
+                    code_key_string = "key509"
+                elif extruder_obj and extruder_obj.heater.smoothed_temp > 500:
+                    msg += " extruder_temp:%s" % round(extruder_obj.heater.smoothed_temp, 2)
+                    code_key_string = "key515"
+                if code_key_string and not self._serial.adc_out_of_range_info["noz0_isReport"]:
+                    # self._serial.adc_out_of_range_info["noz0_isReport"] = True
+                    # gcode._respond_error("""{"code": "%s", "msg":"nozzle %s", "values": []}""" % (code_key_string, self._name + " " + msg))
+                    raise self._reactor.error("""{"code": "%s", "msg":"nozzle %s", "values": []}""" % (code_key_string, self._name + " " + msg))
+        except self._reactor.error as e:
+            code_key_string = ""
+            gcode.run_script("TURN_OFF_HEATERS")
+            # raise gcode.error(str(e))  # TODO: reactor.error暂时不修改, 不能在reactor层捕获
+            gcode._respond_error(str(e))
+        except Exception as err:
+            logging.error(err)
+        return eventtime + 3.0
+
     # Serial callbacks
     def _handle_mcu_stats(self, params):
         count = params['count']
@@ -750,6 +820,8 @@ class MCU:
                 self._name, self._shutdown_msg, self._name, self._shutdown_msg))
         if config_params['is_shutdown']:
             raise error("""{"code": "key298", "msg": "Can not update MCU %s config as it is shutdown", "values":["%s"]}""" % (
+                self._name, self._name))
+            return self._printer.command_warning("""!{"code": "key298", "msg": "Can not update MCU %s config as it is shutdown", "values":["%s"]}""" % (
                 self._name, self._name))
         return config_params
     def _log_info(self):

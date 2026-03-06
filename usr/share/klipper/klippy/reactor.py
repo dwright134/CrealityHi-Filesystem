@@ -10,6 +10,11 @@ import chelper, util
 _NOW = 0.
 _NEVER = 9999999999999999.
 
+class ReactorError(Exception):
+    """Temporarily handle it simply."""
+    pass
+
+
 class ReactorTimer:
     def __init__(self, callback, waketime):
         self.callback = callback
@@ -94,6 +99,7 @@ class ReactorMutex:
 class SelectReactor:
     NOW = _NOW
     NEVER = _NEVER
+    error=ReactorError
     def __init__(self, gc_checking=False):
         # Main code
         self._process = False
@@ -155,7 +161,12 @@ class SelectReactor:
             waketime = t.waketime
             if eventtime >= waketime:
                 t.waketime = self.NEVER
-                t.waketime = waketime = t.callback(eventtime)
+                try:
+                    t.waketime = waketime = t.callback(eventtime)
+                except self.error as e:
+                    logging.error(f"[reactor timer traceback]: {e}")
+                except Exception as e:
+                    logging.error(f"[reactor timer traceback]: {e}")
                 if g_dispatch is not self._g_dispatch:
                     self._next_timer = min(self._next_timer, waketime)
                     self._end_greenlet(g_dispatch)

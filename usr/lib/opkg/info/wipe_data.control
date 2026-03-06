@@ -1,7 +1,7 @@
 Package: wipe_data
 Version: 1.0
 Depends: libc, librt, libpthread
-Source: /data2/116680/lgm1/bb/kl_C4408_V2/openwrt/package/creality/wipe_data
+Source: /data2/116680/lgm1/kl_C4408_V2/openwrt/package/creality/wipe_data
 SourceName: wipe_data
 Section: creality
 SourceDateEpoch: 1727601887

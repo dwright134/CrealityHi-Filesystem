@@ -269,6 +269,9 @@ class BaseSlicer(object):
     def parse_wipe_tower_posy(self) -> Optional[float]:
         return None
 
+    def parse_default_filament_colour(self) -> Optional[Tuple[Any, ...]]:
+        return None
+
 class UnknownSlicer(BaseSlicer):
     def check_identity(self, data: str) -> Optional[Dict[str, str]]:
         return {'slicer': "Unknown"}
@@ -1003,8 +1006,15 @@ class Creality(BaseSlicer):
         return layer_count
 
     def parse_filament_type(self) -> Optional[str]:
-        return _regex_find_string(
-            r";Material Type:(\S+)", self.header_data)
+        result = ""
+        filament_type = _regex_find_string(r";Material Type:(\S+)", self.header_data)
+        if not filament_type:
+            filament_type = _regex_find_string(r"; default_filament_type = (\S+)", self.footer_data)
+        if not filament_type:
+            filament_type = _regex_find_string(r"; filament_type = (\S+)", self.footer_data)
+        if filament_type:
+            result = filament_type.strip(";")
+        return result
 
     def parse_filament_name(self) -> Optional[str]:
         return _regex_find_string(
@@ -1074,6 +1084,23 @@ class Creality(BaseSlicer):
         return _regex_find_first(
         r"; wipe_tower_y = (\d+\.?\d*)", self.footer_data) 
        
+    def parse_filament_used_g(self) -> Optional[Tuple[Any, ...]]:
+        filament_used_g = []
+        filament_used_g_match = re.search(r'; filament used \[g\] = (.+)', self.header_data)
+        if not filament_used_g_match:
+            filament_used_g_match = re.search(r'; filament used \[g\] = (.+)', self.footer_data)
+        if filament_used_g_match:
+            filament_used_g = filament_used_g_match.group(1).split(', ')
+        return filament_used_g
+
+    def parse_default_filament_colour(self) -> Optional[Tuple[Any, ...]]:
+        default_filament_colour = []
+        default_filament_colour_match = re.search(r'default_filament_colour = (\S+)', self.header_data)
+        if not default_filament_colour_match:
+            default_filament_colour_match = re.search(r'default_filament_colour = (\S+)', self.footer_data)
+        if default_filament_colour_match:
+            default_filament_colour = default_filament_colour_match.group(1).split(';')
+        return default_filament_colour
 
 READ_SIZE = 512 * 1024
 SUPPORTED_SLICERS: List[Type[BaseSlicer]] = [
@@ -1098,7 +1125,10 @@ SUPPORTED_DATA = [
     'filament_weight_total',
     'flush_para',
     'model_info',
-    'wipe_tower_posy']
+    'wipe_tower_posy',
+    # 'enable_prime_tower',
+    'default_filament_colour',
+    'filament_used_g']
 
 def process_objects(file_path: str, slicer: BaseSlicer, name: str) -> bool:
     try:

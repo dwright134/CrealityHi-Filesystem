@@ -24,6 +24,7 @@
 /usr/share/klipper/test/configs/hostsimulator.config
 /usr/share/klippy-env/lib/python3.9/site-packages/pip/_vendor/requests/packages/urllib3/util/connection.pyc
 /usr/share/klippy-env/lib/python3.9/site-packages/pip/req/req_file.pyc
+/usr/share/klipper/klippy/extras/steer.pyc
 /usr/share/klippy-env/lib/python3.9/site-packages/pip-9.0.1.dist-info/entry_points.txt
 /usr/share/klipper/klippy/extras/shaper_defs.pyc
 /usr/share/klippy-env/lib/python3.9/site-packages/pip/_vendor/html5lib/filters/__init__.py
@@ -66,6 +67,7 @@
 /usr/share/klipper/klippy/chelper/make_T113arm.sh
 /usr/share/klippy-env/lib/python3.9/site-packages/pip/_vendor/requests/sessions.pyc
 /usr/share/klippy-env/lib/python3.9/site-packages/wheel/test/test_signatures.pyc
+/usr/share/klipper/klippy/extras/steer_wrapper.pyc
 /usr/share/klippy-env/lib/python3.9/site-packages/pip/_vendor/requests/packages/chardet/compat.py
 /usr/share/klippy-env/lib/python3.9/site-packages/pip/_vendor/ordereddict.py
 /usr/share/klippy-env/lib/python3.9/site-packages/pip/_vendor/requests/packages/__init__.py
@@ -214,6 +216,7 @@
 /usr/share/klipper/klippy/extras/static_digital_output.pyc
 /usr/share/klippy-env/lib/python3.9/site-packages/pip/wheel.py
 /usr/share/klipper/fw/F009/noz0_110_G30-noz0_019_000.bin
+/usr/share/klipper/klippy/chelper/filament_change.c
 /usr/share/klipper/klippy/extras/print_stats.py
 /usr/share/klippy-env/lib/python3.9/site-packages/pip/req/req_install.pyc
 /usr/share/klippy-env/lib/python3.9/site-packages/pip/_vendor/html5lib/treewalkers/etree.py
@@ -341,6 +344,7 @@
 /usr/share/klipper/klippy/extras/skew_correction.pyc
 /usr/share/klipper/test/klippy/out_of_bounds.test
 /usr/share/klippy-env/lib/python3.9/site-packages/pkg_resources/_vendor/packaging/specifiers.pyc
+/usr/share/klipper/fw/ccl/ccl0_001_G21-ccl0_000_001.bin
 /usr/share/klippy-env/lib/python3.9/bisect.pyc
 /usr/share/klippy-env/lib/python3.9/site-packages/pip/commands/wheel.py
 /usr/share/klipper/klippy/extras/display_status.pyc
@@ -729,6 +733,7 @@
 /usr/share/klippy-env/lib/python3.9/site-packages/pip/commands/check.py
 /usr/share/klippy-env/lib/python3.9/site-packages/setuptools/version.py
 /usr/share/klippy-env/lib/python3.9/site-packages/wheel/__init__.pyc
+/usr/share/klipper/klippy/extras/steer.py
 /usr/share/klippy-env/bin/easy_install
 /usr/share/klipper/klippy/extras/prtouch.py
 /usr/share/klippy-env/lib/python3.9/site-packages/pip/_vendor/progress/spinner.pyc
@@ -767,10 +772,12 @@
 /usr/share/klippy-env/lib/python3.9/site-packages/aenum/__init__.py
 /usr/share/klippy-env/lib/python3.9/site-packages/pip/_vendor/requests/packages/urllib3/util/__init__.py
 /usr/share/klipper/docs/Delta_Calibrate.md
+/usr/share/klipper/klippy/extras/steer_wrapper.py
 /usr/share/klipper/docs/Installation.md
 /usr/share/klipper/test/klippy/pwm.cfg
 /usr/share/klipper/.github/FUNDING.yml
 /usr/share/klipper/klippy/extras/z_align.pyc
+/usr/share/klipper/klippy/extras/steer_wrapper.cpython-39.so
 /usr/share/klippy-env/lib/python3.9/site-packages/pip/_vendor/requests/packages/chardet/mbcharsetprober.pyc
 /usr/share/klipper/klippy/extras/box.py
 /usr/share/klipper/klippy/kinematics/winch.py
@@ -1065,9 +1072,11 @@
 /usr/share/klippy-env/lib/python3.9/site-packages/setuptools/unicode_utils.py
 /usr/share/klipper/klippy/extras/temperature_mcu.pyc
 /usr/share/klippy-env/lib/python3.9/site-packages/setuptools/command/bdist_egg.pyc
+/usr/share/klipper/fw/ccl/version.json
 /usr/share/klippy-env/lib/python3.9/site-packages/pip/__init__.pyc
 /usr/share/klippy-env/lib/python3.9/site-packages/setuptools/unicode_utils.pyc
 /usr/share/klippy-env/lib/python3.9/site-packages/setuptools/command/upload_docs.py
+/usr/share/klipper/klippy/chelper/msgblock_485.c
 /usr/share/klipper/klippy/extras/replicape.pyc
 /usr/share/klipper/klippy/util.py
 /usr/share/klippy-env/lib/python3.9/site-packages/setuptools/msvc.pyc
@@ -1130,6 +1139,7 @@
 /usr/share/klippy-env/lib/python3.9/site-packages/setuptools/archive_util.py
 /usr/share/klipper/klippy/extras/fan_feedback.pyc
 /usr/share/klippy-env/lib/python3.9/site-packages/pip/_vendor/requests/packages/chardet/jpcntx.pyc
+/usr/share/klipper/klippy/extras/steer_wrapper.c
 /usr/share/klippy-env/lib/python3.9/site-packages/pkg_resources/_vendor/packaging/__about__.pyc
 /usr/share/klippy-env/lib/python3.9/site-packages/pip/_vendor/html5lib/_trie/__init__.py
 /usr/share/klippy-env/lib/python3.9/site-packages/setuptools/command/install.py
@@ -1145,6 +1155,7 @@
 /usr/share/klipper/klippy/extras/tuning_tower.pyc
 /usr/share/klippy-env/lib/python3.9/site-packages/pip/_vendor/requests/packages/chardet/sjisprober.pyc
 /usr/share/klippy-env/lib/python3.9/site-packages/pip/commands/show.pyc
+/usr/share/klipper/klippy/chelper/serial_485_queue.c
 /usr/share/klippy-env/lib/python3.9/site-packages/pip/commands/hash.pyc
 /usr/share/klippy-env/lib/python3.9/site-packages/setuptools/command/egg_info.pyc
 /usr/share/klippy-env/lib/python3.9/site-packages/setuptools/sandbox.py

@@ -1,7 +1,7 @@
 Package: librpmsg
 Version: 1.2.0-1
 Depends: libc, librt, libpthread
-Source: /data2/116680/lgm1/bb/kl_C4408_V2/openwrt/package/allwinner/common/rpmsg
+Source: /data2/116680/lgm1/kl_C4408_V2/openwrt/package/allwinner/common/rpmsg
 SourceName: librpmsg
 Section: allwinner
 SourceDateEpoch: 1688356042

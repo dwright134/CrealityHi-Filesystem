@@ -2,7 +2,7 @@ Package: libcurl4
 Version: 7.82.0-2
 Depends: libc, librt, libpthread, libopenssl1.1, libnghttp2-14, ca-bundle, libcares
 Provides: libcurl
-Source: /data2/116680/lgm1/bb/kl_C4408_V2/openwrt/package/feeds/net/curl
+Source: /data2/116680/lgm1/kl_C4408_V2/openwrt/package/feeds/net/curl
 SourceName: libcurl
 License: MIT
 LicenseFiles: COPYING

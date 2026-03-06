@@ -12,6 +12,7 @@ from gcode import *
 from toolhead import *
 from stepper import *
 from configfile import *
+import subprocess
 
 
 class NozzleClear:
@@ -45,6 +46,8 @@ class NozzleClear:
         if self.config.has_section("box"):
             self.extrude_pos_x      = config.getsection('box').getfloat('extrude_pos_x')
         self.gcode.register_command('NOZ_CLEAR', self.cmd_NOZZLE_CLEAR, desc=self.cmd_F018_NOZZLE_CLEAR_help)
+        self.gcode.register_command('NOZ_CLEAR_TEST', self.cmd_NOZZLE_CLEAR_TEST, desc=self.cmd_F018_NOZZLE_CLEAR_TEST_help)
+        self.gcode.register_command('BOX_TEST_COUNT', self.cmd_test_count)
         self.gcode.register_command('FORECEZ', self.cmd_FORECEZ, desc=self.cmd_F018_FORECEZ_help)
         pass
     
@@ -172,6 +175,80 @@ class NozzleClear:
             raise
         finally:
             self.inside_nozzle_clear= False
+
+    cmd_F018_NOZZLE_CLEAR_TEST_help = "Clear the nozzle test on bed."
+    def cmd_NOZZLE_CLEAR_TEST(self, gcmd):
+        # self.gcode.run_script_from_command('M109 S%d'%(self.clear_temp))
+        Test_cnt = gcmd.get_int("N", minval=0, maxval=100000, default=3000)
+        self.gcode.run_script_from_command('G28')
+
+        self.gcode.run_script_from_command('SET_PIN PIN=fan0 VALUE=127.0')
+        self.gcode.run_script_from_command('M109 S%d'%(self.clear_temp))
+        self.gcode.run_script_from_command('M104 S0')
+        self.gcode.run_script_from_command('SET_PIN PIN=fan0 VALUE=0.0')
+        for j in range(Test_cnt):
+            #粗擦
+            self.gcode.run_script_from_command('G90')
+            self.gcode.run_script_from_command('G0 Z3 F300')
+            check_pos = [self.clear_start[0] - 20, self.clear_start[1]]
+            self.gcode.run_script_from_command('G0 X%fY%fF%d'%(check_pos[0], check_pos[1], self.clear_speed))
+            self.gcode.run_script_from_command('PROBE')
+            self.gcode.run_script_from_command('SET_KINEMATIC_POSITION Z=0')
+            if self.enable_clear == True:
+                check_pos = [self.clear_start[0], self.clear_start[1]]
+                self.gcode.run_script_from_command('G0 X%fY%fF%d'%(check_pos[0], check_pos[1],self.clear_speed))
+                self.gcode.run_script_from_command('G91')
+                self.gcode.run_script_from_command('G0 X%fY%f F%f' %(self.probe_pos_diff[0], self.probe_pos_diff[1], self.clear_speed))
+                self.gcode.run_script_from_command('G0 Z%f F300' %(self.upraise))
+                self.gcode.run_script_from_command('G90')
+                self.gcode.run_script_from_command('G0 F%f'%(self.clear_speed))
+                self.gcode.run_script_from_command('G91')
+                for i in range(self.clear_cnt):
+                    self.gcode.run_script_from_command('G0 X%f'%(self.clear_lenght[0]))
+                    self.gcode.run_script_from_command('G0 Y%f'%(self.clear_lenght[1]))
+                    self.gcode.run_script_from_command('G0 X%f'%(-self.clear_lenght[0]))
+                    self.gcode.run_script_from_command('G0 Y%f'%(-self.clear_lenght[1]))
+                    self.cmd_test_count(gcmd)
+                    pass
+
+
+    # test, Record the number of blade tests
+    def cmd_test_count(self, gcmd):
+        clear_flag = gcmd.get_int("C", minval=0, maxval=1, default=0)
+        count_file = "/root/test_count.txt"
+
+        # 如果参数中包含 'Clear'，则清空计数文件
+        if clear_flag:
+            self.gcode.respond_info("Clearing count file and resetting count.")
+            with open(count_file, "w") as f:
+                f.write("0")
+            
+            # 执行系统的 sync 命令，确保文件写入磁盘
+            subprocess.run(["sync"])
+            return
+
+        # 检查文件是否存在，读取当前计数值
+        if os.path.exists(count_file):
+            with open(count_file, "r") as f:
+                try:
+                    current_count = int(f.read().strip())
+                except ValueError:
+                    current_count = 0
+        else:
+            current_count = 0
+
+        # 增加计数值
+        new_count = current_count + 1
+
+        # 将新计数值写回文件
+        with open(count_file, "w") as f:
+            f.write(str(new_count))
+
+        # 执行系统的 sync 命令，确保数据写入磁盘
+        subprocess.run(["sync"])
+
+        # 打印并返回当前计数
+        self.gcode.respond_info("test_count = %d\n" % new_count)
 
 
 def load_config(config):

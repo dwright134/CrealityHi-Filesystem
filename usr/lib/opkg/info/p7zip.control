@@ -1,7 +1,7 @@
 Package: p7zip
 Version: 16.02
 Depends: libc, librt, libpthread, libstdcpp6
-Source: /data2/116680/lgm1/bb/kl_C4408_V2/openwrt/package/creality/p7zip
+Source: /data2/116680/lgm1/kl_C4408_V2/openwrt/package/creality/p7zip
 SourceName: p7zip
 Section: creality
 SourceDateEpoch: 1709204925

@@ -493,7 +493,7 @@ class PrinterConfig:
             logging.exception(msg)
             raise gcode.error(msg)
         # Request a restart
-        gcode.request_restart('restart')
+        gcode.request_restart('firmware_restart')
 
     cmd_CXSAVE_CONFIG_help = "Overwrite config file by cx "
     def cmd_CXSAVE_CONFIG(self, gcmd):

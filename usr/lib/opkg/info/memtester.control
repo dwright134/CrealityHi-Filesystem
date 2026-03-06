@@ -1,7 +1,7 @@
 Package: memtester
 Version: 4.5.1-1
 Depends: libc, librt, libpthread
-Source: /data2/116680/lgm1/bb/kl_C4408_V2/openwrt/package/feeds/utils/memtester
+Source: /data2/116680/lgm1/kl_C4408_V2/openwrt/package/feeds/utils/memtester
 SourceName: memtester
 Section: utils
 SourceDateEpoch: 1688356042

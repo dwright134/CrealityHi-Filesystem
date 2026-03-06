@@ -271,7 +271,7 @@ class ClientConnection:
         result = web_request.finish()
         if result is None:
             return
-        self.send(result)
+        self.send(result)  # TODO: 暂未对api分级处理，依旧沿用error逻辑，master/app由display屏蔽webrequest异常上报
 
     def send(self, data):
         jmsg = json.dumps(data, separators=(',', ':'))
@@ -481,6 +481,26 @@ class QueryStatusHelper:
         objects = [n for n, o in self.printer.lookup_objects()
                    if hasattr(o, 'get_status')]
         web_request.send({'objects': objects})
+    def _deep_compare(self, old_val, new_val):
+        """比较不可变类型"""
+        if type(old_val) != type(new_val):
+            return False
+        if isinstance(new_val, dict):
+            if set(old_val.keys()) != set(new_val.keys()):
+                return False
+            for key in new_val.keys():
+                if not self._deep_compare(old_val.get(key), new_val.get(key)):
+                    return False
+            return True
+        elif isinstance(new_val, (list, tuple)):
+            if len(old_val) != len(new_val):
+                return False
+            for i in range(len(new_val)):
+                if not self._deep_compare(old_val[i], new_val[i]):
+                    return False
+            return True
+        else:
+            return old_val == new_val
     def _do_query(self, eventtime):
         last_query = self.last_query
         query = self.last_query = {}
@@ -512,7 +532,9 @@ class QueryStatusHelper:
                 for ri in req_items:
                     rd = res.get(ri, None)
                     if is_query or rd != lres.get(ri):
-                        cres[ri] = rd
+                         cres[ri] = rd
+                    # if is_query or not self._deep_compare(lres.get(ri), rd):
+                    #     cres[ri] = rd
                 if cres or is_query:
                     cquery[obj_name] = cres
             # Send data

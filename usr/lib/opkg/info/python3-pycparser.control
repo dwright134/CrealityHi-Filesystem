@@ -1,7 +1,7 @@
 Package: python3-pycparser
 Version: 2.20-5
 Depends: libc, librt, libpthread, python3-light, python3-ply
-Source: /data2/116680/lgm1/bb/kl_C4408_V2/openwrt/package/feeds/lang/python/python-pycparser
+Source: /data2/116680/lgm1/kl_C4408_V2/openwrt/package/feeds/lang/python/python-pycparser
 SourceName: python3-pycparser
 License: BSD-3-Clause
 LicenseFiles: LICENSE

@@ -1,7 +1,7 @@
 Package: libgpg-error
 Version: 1.42-1
 Depends: libc, librt, libpthread
-Source: /data2/116680/lgm1/bb/kl_C4408_V2/openwrt/package/feeds/libs/libgpg-error
+Source: /data2/116680/lgm1/kl_C4408_V2/openwrt/package/feeds/libs/libgpg-error
 SourceName: libgpg-error
 License: LGPL-2.1-or-later
 LicenseFiles: COPYING

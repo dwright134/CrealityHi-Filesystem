@@ -51,6 +51,7 @@
 /etc/sysConfig/UIResource/R2.8/CFS_manual.png
 /etc/sysConfig/UIResource/R2.8/home_logo.png
 /etc/sysConfig/UIResource/R2.8/home_FAQ.png
+/etc/sysConfig/defData/cert/server.crt
 /etc/sysConfig/UIResource/K1/selfchecking_2.png
 /etc/sysConfig/defData/Auto_pressure_advance_testpadvance_product_test.gcode
 /etc/sysConfig/UIResource/R2.8/CFS_shelf_A.png
@@ -70,6 +71,7 @@
 /etc/sysConfig/UIResource/R2.8/img_f011_title_tab_right.png
 /etc/sysConfig/UIResource/R2.8/file_clock.png
 /etc/sysConfig/UIResource/K1/usedtimeicon.png
+/etc/sysConfig/defData/cert/server.key
 /etc/sysConfig/UIResource/K1/TilteLeftstyle.png
 /etc/sysConfig/UIResource/R2.8/net_wifi.png
 /etc/sysConfig/UIResource/R2.8/test/Test17.png
@@ -171,6 +173,7 @@
 /etc/sysConfig/UIResource/R2.8/selftest_waiting.png
 /etc/sysConfig/UIResource/R2.8/CFS_illustration_B.png
 /etc/sysConfig/UIResource/K1/warningTips.png
+/etc/sysConfig/defData/cert/ca.crt
 /etc/sysConfig/UIResource/R2.8/prev.png
 /etc/sysConfig/UIResource/K1/checking.gif
 /etc/sysConfig/UIResource/R2.8/wifi_state_2.png
@@ -219,6 +222,7 @@
 /etc/sysConfig/UIResource/R2.8/net_lock.png
 /etc/sysConfig/UIResource/R2.8/root_info.png
 /etc/sysConfig/UIResource/R2.8/test/Test13.png
+/usr/share/cert/ca.crt
 /etc/sysConfig/UIResource/K1_Max/K2Plus_Checktips.png
 /etc/sysConfig/UIResource/K1_Max/K1Max_Checktips.png
 /etc/sysConfig/UIResource/K1/K1C_Machine.png
@@ -241,6 +245,7 @@
 /etc/sysConfig/UIResource/R2.8/Stepper_release.png
 /etc/sysConfig/UIResource/R2.8/img_f011_object_focussed.png
 /usr/bin/app-server
+/usr/share/cert/server.crt
 /etc/sysConfig/UIResource/R2.8/test/Test9.png
 /etc/sysConfig/UIResource/R2.8/img_f011_next.png
 /etc/sysConfig/UIResource/R2.8/EstateRunout.png
@@ -263,6 +268,7 @@
 /etc/sysConfig/UIResource/K1/SortUpSelect.png
 /etc/sysConfig/UIResource/K1/remainingtimeicon.png
 /etc/sysConfig/defData/laser_test_line.gcode
+/usr/share/cert/server.key
 /etc/sysConfig/UIResource/K1/selfchecking_0.png
 /etc/sysConfig/UIResource/R2.8/kb_delete_icon.png
 /etc/sysConfig/defData/Auto_strain_gauge_pa_compute_config.json

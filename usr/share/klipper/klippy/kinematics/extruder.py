@@ -247,12 +247,14 @@ class PrinterExtruder:
         gcode.register_mux_command("ACTIVATE_EXTRUDER", "EXTRUDER",
                                    self.name, self.cmd_ACTIVATE_EXTRUDER,
                                    desc=self.cmd_ACTIVATE_EXTRUDER_help)
+        self.extrude_below_min_temp_err_is_report = False
     def update_move_time(self, flush_time):
         self.trapq_finalize_moves(self.trapq, flush_time)
     def get_status(self, eventtime):
         sts = self.heater.get_status(eventtime)
         sts['can_extrude'] = self.heater.can_extrude
         sts['nozzle_diameter'] = self.nozzle_diameter
+        sts['extrude_below_min_temp_err_is_report'] = self.extrude_below_min_temp_err_is_report
         if self.extruder_stepper is not None:
             sts.update(self.extruder_stepper.get_status(eventtime))
         return sts
@@ -267,10 +269,20 @@ class PrinterExtruder:
     def check_move(self, move):
         axis_r = move.axes_r[3]
         if not self.heater.can_extrude:
-            if self.force_move_e_flag == False:
-                raise self.printer.command_error(
-                    """{"code":"key111", "msg": "Extrude below minimum temp\nSee the 'min_extrude_temp' config option for details", "values": []}"""
-                )
+            gcode = self.printer.lookup_object('gcode')
+            print_stats = self.printer.lookup_object('print_stats')
+            m = """{"code":"key111", "msg": "Extrude below minimum temp, See the 'min_extrude_temp' config option for details", "values": []}"""
+            if print_stats.state == "printing" and self.extrude_below_min_temp_err_is_report==False:
+                # gcode._respond_error(m)
+                self.printer.command_warning(m)
+                self.extrude_below_min_temp_err_is_report = True
+                gcode.respond_info("state:%s pause_start:%s" % (self.printer.lookup_object('print_stats').state, self.printer.lookup_object('pause_resume').pause_start))
+                if self.printer.lookup_object('print_stats').state == "printing" and self.printer.lookup_object('pause_resume').pause_start == False:
+                    self.printer.lookup_object('gcode').run_script_from_command("PAUSE")
+            elif print_stats.state == "standby":
+                # gcode._respond_error(m)
+                self.printer.command_warning(m)
+            return
         if (not move.axes_d[0] and not move.axes_d[1]) or axis_r < 0.:
             # Extrude only move (or retraction move) - limit accel and velocity
             if abs(move.axes_d[3]) > self.max_e_dist:
@@ -328,7 +340,8 @@ class PrinterExtruder:
             if extruder is None:
                 if temp <= 0.:
                     return
-                raise gcmd.error("""{"code":"key113", "msg": "Extruder not configured", "values": []}""")
+                #raise gcmd.error("""{"code":"key113", "msg": "Extruder not configured", "values": []}""")
+                return gcmd.warning("""!{"code":"key113", "msg": "Extruder not configured", "values": []}""")
         else:
             extruder = self.printer.lookup_object('toolhead').get_extruder()
         pheaters = self.printer.lookup_object('heaters')

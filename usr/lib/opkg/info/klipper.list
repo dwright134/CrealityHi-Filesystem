@@ -485,6 +485,7 @@
 /usr/share/klipper/scripts/avrsim.py
 /usr/share/klipper/test/configs/lpc176x.config
 /usr/share/klippy-env/lib/python3.9/site-packages/aenum/test_v3.pyc
+/usr/share/klipper/klipper_auto_deploy.sh
 /usr/share/klipper/docs/Config_Changes.md
 /usr/share/klipper/docs/developer-certificate-of-origin
 /usr/share/klippy-env/lib/python3.9/site-packages/pip/_vendor/lockfile/pidlockfile.pyc
@@ -764,7 +765,6 @@
 /usr/share/klippy-env/lib/python3.9/site-packages/setuptools/lib2to3_ex.pyc
 /usr/share/klippy-env/lib/python3.9/site-packages/pip/_vendor/html5lib/filters/alphabeticalattributes.pyc
 /usr/share/klippy-env/lib/python3.9/site-packages/pip/_vendor/requests/packages/urllib3/poolmanager.pyc
-/usr/share/klipper/fw/cfs/cfs0_050_G30-cfs0_000_113.bin
 /usr/share/klippy-env/lib/python3.9/site-packages/aenum-3.1.0.dist-info/INSTALLER
 /usr/share/klipper/klippy/stepper.pyc
 /usr/share/klipper/test/configs/stm32f407.config
@@ -857,7 +857,6 @@
 /usr/share/klippy-env/lib/python3.9/site-packages/pip/commands/completion.py
 /usr/share/klipper/klippy/gcode.pyc
 /usr/share/klippy-env/lib/python3.9/site-packages/pip/_vendor/html5lib/_utils.py
-/usr/share/klipper/fw/cfs/cfs0_050_G32-cfs0_000_113.bin
 /usr/share/klipper/klippy/extras/serial_485.py
 /usr/share/klipper/docs/prints/ringing_tower.stl
 /usr/share/klipper/klippy/chelper/kin_corexy.c
@@ -1304,6 +1303,7 @@
 /usr/share/klipper/klippy/chelper/shaper_calibrate_c/libfftw3_arm.a
 /usr/share/klipper/klippy/kinematics/rotary_delta.pyc
 /usr/share/klipper/test/configs/samd21g18.config
+/usr/share/klipper/fw/cfs/cfs0_050_G30-cfs0_000_142.bin
 /usr/share/klipper/test/klippy/linuxtest.cfg
 /usr/share/klippy-env/lib/python3.9/site-packages/pip/utils/ui.py
 /usr/share/klipper/klippy/mathutil.py
@@ -1400,6 +1400,7 @@
 /usr/share/klipper/docs/TSL1401CL_Filament_Width_Sensor.md
 /usr/share/klippy-env/lib/python3.9/_bootlocale.pyc
 /usr/share/klippy-env/lib/python3.9/site-packages/pip/commands/completion.pyc
+/usr/share/klipper/fw/cfs/cfs0_050_G32-cfs0_000_142.bin
 /usr/share/klippy-env/lib/python3.9/site-packages/pip/_vendor/requests/packages/urllib3/_collections.py
 /usr/share/klipper/klippy/chelper/itersolve.c
 /usr/share/klipper/test/configs/samd51p20.config

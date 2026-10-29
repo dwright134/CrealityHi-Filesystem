@@ -194,6 +194,8 @@ class SerialReader:
                     key = 343
                 elif "'nozzle_mcu'" in self.warn_prefix:
                     key = 344
+                elif "'bed_mcu'" in self.warn_prefix:
+                    key = 345
                 elif "'leveling_mcu'" in self.warn_prefix:
                     key = 345
                 raise error("""{"code": "key%s", "msg": "Unable to connect %s", "values":["%s"]}""" % (key, self.warn_prefix, self.warn_prefix))
